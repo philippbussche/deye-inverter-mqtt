@@ -19,12 +19,15 @@ import os
 
 
 class DeyeMqttConfig():
-    def __init__(self, host: str, port: int, username: str, password: str, topic_prefix: str):
+    def __init__(self, host: str, port: int, username: str, password: str, topic_prefix: str, topic_suffix: str, device_id: str, cert_path: str):
         self.host = host
         self.port = port
         self.username = username
         self.password = password
         self.topic_prefix = topic_prefix
+        self.topic_suffix = topic_suffix
+        self.device_id = device_id
+        self.cert_path = cert_path
 
     @staticmethod
     def from_env():
@@ -33,7 +36,10 @@ class DeyeMqttConfig():
             port=int(os.getenv('MQTT_PORT')),
             username=os.getenv('MQTT_USERNAME'),
             password=os.getenv('MQTT_PASSWORD'),
-            topic_prefix=os.getenv('MQTT_TOPIC_PREFIX')
+            topic_prefix=os.getenv('MQTT_TOPIC_PREFIX'),
+            topic_suffix=os.getenv('MQTT_TOPIC_SUFFIX'),
+            device_id=os.getenv('MQTT_DEVICE_ID'),
+            cert_path=os.getenv('MQTT_CERTIFICATE_PATH')
         )
 
 
@@ -45,10 +51,11 @@ class DeyeLoggerConfig():
     with the device.
     """
 
-    def __init__(self, serial_number: int, ip_address: str, port: int):
+    def __init__(self, serial_number: int, ip_address: str, port: int, simulate: str):
         self.serial_number = serial_number
         self.ip_address = ip_address
         self.port = port
+        self.simulate = simulate
 
     @staticmethod
     def from_env():
@@ -56,6 +63,7 @@ class DeyeLoggerConfig():
             serial_number=int(os.getenv('DEYE_LOGGER_SERIAL_NUMBER')),
             ip_address=os.getenv('DEYE_LOGGER_IP_ADDRESS'),
             port=int(os.getenv('DEYE_LOGGER_PORT')),
+            simulate=os.getenv('DEYE_LOGGER_SIMULATE')
         )
 
 

@@ -40,9 +40,17 @@ class DeyeDaemon():
 
     def do_task(self):
         self.__log.info("Reading start")
-        regs = self.modbus.read_registers(0x3c, 0x4f) \
+        self.__log.info("Simulate: %s" % self.__config.logger.simulate)
+        if(self.__config.logger.simulate.lower() == 'true'):
+            self.__log.info("Simulating inverter response using test data.")
+            regs = {60: b'\x00\x03'}
+        else:
+            self.__log.info("Fetching inverter response using modbus.")
+            regs = self.modbus.read_registers(0x3c, 0x4f) \
             | self.modbus.read_registers(0x50, 0x5f) \
-            | self.modbus.read_registers(0x6d, 0x74)
+            | self.modbus.read_registers(0x6d, 0x74)  
+            self.__log.debug("Regs received: %s" % regs)
+
         timestamp = datetime.datetime.now()
         observations = []
         for sensor in self.sensors:

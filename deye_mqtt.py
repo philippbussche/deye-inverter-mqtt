@@ -19,6 +19,7 @@ from typing import List
 import logging
 
 import paho.mqtt.client as paho
+import ssl
 
 from deye_config import DeyeConfig
 from deye_observation import Observation
@@ -28,19 +29,26 @@ class DeyeMqttClient():
 
     def __init__(self, config: DeyeConfig):
         self.__log = logging.getLogger(DeyeMqttClient.__name__)
-        self.__mqtt_client = paho.Client("deye_inverter")
+        self.__mqtt_client = paho.Client(client_id=config.mqtt.device_id, protocol=paho.MQTTv311)
         self.__mqtt_client.enable_logger()
         self.__mqtt_client.username_pw_set(username=config.mqtt.username, password=config.mqtt.password)
+        self.__mqtt_client.tls_set(ca_certs=config.mqtt.cert_path, certfile=None, keyfile=None,
+                cert_reqs=ssl.CERT_REQUIRED, tls_version=ssl.PROTOCOL_TLSv1_2, ciphers=None)
+        self.__mqtt_client.tls_insecure_set(False)
         self.__config = config.mqtt
         self.__mqtt_timeout = 3 # seconds
 
     def __do_publish(self, observation: Observation):
         try:
             if observation.sensor.mqtt_topic_suffix:
-                mqtt_topic = f'{self.__config.topic_prefix}/{observation.sensor.mqtt_topic_suffix}'
+                mqtt_topic = f'{self.__config.topic_prefix}/{self.__config.device_id}/{self.__config.topic_suffix}'
                 value = observation.value_as_str()
-                self.__log.debug("Publishing message. topic: '%s', value: '%s'", mqtt_topic, value)
-                info = self.__mqtt_client.publish(mqtt_topic, value, qos=1)
+                event = { 
+                    "metric": observation.sensor.mqtt_topic_suffix,
+                    "value": float(value) 
+                }
+                self.__log.debug("Publishing message. topic: '%s', event: '%s'", mqtt_topic, event)
+                info = self.__mqtt_client.publish(mqtt_topic, str(event), qos=1)
                 info.wait_for_publish(self.__mqtt_timeout)
         except ValueError as e:
             self.__log.error("MQTT outgoing queue is full", str(e))
@@ -52,6 +60,7 @@ class DeyeMqttClient():
 
     def publish_observations(self, observations: List[Observation]):
         try:
+            self.__log.info("Connecting to : %s", self.__config.host)
             self.__mqtt_client.connect(self.__config.host, self.__config.port)
             self.__mqtt_client.loop_start()
             for observation in observations:

@@ -53,7 +53,7 @@ uptime_sensor = SingleRegisterSensor("Uptime", 0x3e, 1, mqtt_topic_suffix='uptim
 pv1_voltage_sensor = SingleRegisterSensor("PV1 Voltage", 0x6d, 0.1, mqtt_topic_suffix='dc/pv1/voltage')
 pv1_current_sensor = SingleRegisterSensor("PV1 Current", 0x6e, 0.1, mqtt_topic_suffix='dc/pv1/current')
 pv1_power_sensor = ComputedPowerSensor("PV1 Power", pv1_voltage_sensor,
-                                       pv1_current_sensor, mqtt_topic_suffix='dc/pv1/power')
+                                       pv1_current_sensor, mqtt_topic_suffix='dc/pv1/power', groups=['watts'])
 pv1_daily_sensor = SingleRegisterSensor("PV1 Production today", 0x41, 0.1,
                                         mqtt_topic_suffix='dc/pv1/day_energy', groups=['micro'])
 pv1_total_sensor = DoubleRegisterSensor(
@@ -63,7 +63,7 @@ pv1_total_sensor = DoubleRegisterSensor(
 pv2_voltage_sensor = SingleRegisterSensor("PV2 Voltage", 0x6f, 0.1, mqtt_topic_suffix='dc/pv2/voltage')
 pv2_current_sensor = SingleRegisterSensor("PV2 Current", 0x70, 0.1, mqtt_topic_suffix='dc/pv2/current')
 pv2_power_sensor = ComputedPowerSensor("PV2 Power", pv2_voltage_sensor,
-                                       pv2_current_sensor, mqtt_topic_suffix='dc/pv2/power')
+                                       pv2_current_sensor, mqtt_topic_suffix='dc/pv2/power', groups=['watts'])
 pv2_daily_sensor = SingleRegisterSensor("PV2 Production today", 0x42, 0.1,
                                         mqtt_topic_suffix='dc/pv2/day_energy', groups=['micro'])
 pv2_total_sensor = DoubleRegisterSensor(
